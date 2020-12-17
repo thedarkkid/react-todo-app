@@ -1,30 +1,23 @@
-import React from 'react';
-import Todos from './components/Todos';
+import React, {Fragment} from 'react';
+import Todos from './components/todo/Todos';
 import Header from "./components/layout/Header";
-import AddTodo from "./components/AddTodo.";
+import AddTodo from "./components/todo/AddTodo";
+import { BrowserRouter as Router, Route} from "react-router-dom";
+import About from "./components/pages/About";
+import axios from "axios";
 
 export default class App extends React.Component {
 
   state = {
     todos: [
-      {
-        id: 1,
-        title: 'Take out the trash',
-        completed: false
-      },
-      {
-        id: 2,
-        title: 'Dinner with son',
-        completed: false
-      },
-      {
-        id: 3,
-        title: 'meeting with hoss',
-        completed: true
-      }
+
     ],
-    count: 3
+    count: 10
   };
+
+  componentDidMount() {
+    axios.get(_endpoint(`todos?_limit=${this.state.count}`)).then( res => this.setState({todos: res.data}));
+  }
 
 
   toggleComplete = (id) => {
@@ -35,27 +28,42 @@ export default class App extends React.Component {
   };
 
   deleteTodo = (id) => {
-    this.setState({ todos: [...this.state.todos.filter( todo => todo.id !== id )]})
+    axios.delete(_endpoint(`todos/${id}`)).then( res => {
+      this.setState({ todos: [...this.state.todos.filter( todo => todo.id !== id )]})
+    });
   };
 
   addTodo = (todo) => {
-    this.setState({
-      todos: [...this.state.todos, {title: todo.title, completed: false, id: this.state.count+1}],
-      count: (this.state.count+1)
-    })
+    axios.post(_endpoint('todos'), {title: todo.title, completed: false, id: this.state.count+1})
+      .then( (res) => {
+        this.setState({
+          todos: [...this.state.todos, res.data],
+          count: (this.state.count+1)
+        })
+      })
 
   };
 
   render(){
     return (
-      <div className="App">
-        <div className="container">
-          <Header/>
-          <AddTodo addTodo={this.addTodo} />
-          <Todos todos={this.state.todos} toggleComplete={this.toggleComplete} deleteTodo={this.deleteTodo}/>
-        </div>
-      </div>
+        <Router>
+          <div className="App">
+            <div className="container">
+              <Header/>
+              <Route exact path="/" render={ props => (
+                  <Fragment>
+                    <AddTodo addTodo={this.addTodo} />
+                    <Todos todos={this.state.todos} toggleComplete={this.toggleComplete} deleteTodo={this.deleteTodo}/>
+                  </Fragment>
+              )}/>
+              <Route path="/about" component={About} />
+
+            </div>
+          </div>
+        </Router>
     );
   }
 }
 
+const apiURI = "https://jsonplaceholder.typicode.com/";
+const _endpoint = (endpoint) => apiURI+endpoint;
