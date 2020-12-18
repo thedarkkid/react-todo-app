@@ -1,20 +1,32 @@
-import React, { Component } from 'react';
+import React, {Fragment, useEffect, useState} from 'react'
 import TodoItem from "./TodoItem.";
-import PropTypes from 'prop-types';
+import Paginator from "../../common/Paginator";
 
-export default class Todos extends Component {
+let paginator = null;
+export default function Todos(props) {
+    const [todos, setTodos] = useState(props.todos);
+
+    useEffect( () => {
+        if(props.todos && props.todos.length > 0){
+            if(props.todos.length !== todos.length){
+                paginator = new Paginator(props.todos, 2);
+                setTodos(paginator.Current);
+            }
+        }
+    },  [props]);
 
 
-    render() {
-        return this.props.todos.map( (todo) => (
-            <TodoItem key={todo.id} todo={todo} toggleComplete={this.props.toggleComplete} delete={this.props.deleteTodo}/>
-        ));
-    }
-
+    return (
+        <Fragment>
+            {
+                todos.map( (todo) => (
+                    <TodoItem key={todo.id} todo={todo} toggleComplete={props.toggleComplete} delete={props.deleteTodo}/>
+                ))
+            }
+            <Fragment>
+                <button onClick={() => setTodos(paginator.Previous)}>Previous</button>
+                <button onClick={() => setTodos(paginator.Next)}>Next</button>
+            </Fragment>
+        </Fragment>
+    );
 }
-
-
-Todos.propTypes = {
-    todos: PropTypes.array.isRequired,
-    toggleComplete: PropTypes.func.isRequired
-};

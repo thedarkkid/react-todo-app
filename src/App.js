@@ -12,11 +12,13 @@ export default class App extends React.Component {
     todos: [
 
     ],
-    count: 10
+    count: 10,
   };
 
   componentDidMount() {
-    axios.get(_endpoint(`todos?_limit=${this.state.count}`)).then( res => this.setState({todos: res.data}));
+    axios.get(_endpoint(`todos?_limit=10`)).then( res => {
+      this.setState({todos: res.data});
+    });
   }
 
 
@@ -53,7 +55,7 @@ export default class App extends React.Component {
               <Route exact path="/" render={ props => (
                   <Fragment>
                     <AddTodo addTodo={this.addTodo} />
-                    <Todos todos={this.state.todos} toggleComplete={this.toggleComplete} deleteTodo={this.deleteTodo}/>
+                    <Todos todos={this.state.todos}  toggleComplete={this.toggleComplete} deleteTodo={this.deleteTodo}/>
                   </Fragment>
               )}/>
               <Route path="/about" component={About} />
